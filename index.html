@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <!--><script src="jquery-1.12.0.min.js"></script></!-->
+        <script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
+        <!--><script src='http://localhost:3000/socket.io/socket.io.js'></script></!-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src='gamePage.js'></script>
+        <script type="text/javascript">
+        /*
+            var serverAddress = "http://localhost:3000";
+            function draw(){
+              var canvas = document.getElementById("gameBoard");
+
+              if (canvas.getContext){
+                var ctx = canvas.getContext("2d");
+                canvas.addEventListener('click', generateAction, false);
+              } else {
+                console.log("canvas not supported");
+              }
+            }
+            var socket;
+
+            function generateAction(event) {
+                console.log("foobar");
+                 console.log("X: " + event.clientX + ", offsetLeft: " + canvas.offsetLeft;);
+                 console.log("Y: " + event.clientY);
+            }
+
+            function generateServerConnection() {
+                socket = io(serverAddress);
+            }
+
+            function startGame() {
+                socket.emit("startNewGame");
+                $("#startGameButton").prop('disabled', true);
+            }
+            function quitGame() {
+                socket.emit("quit");
+            }
+            //draw();
+            generateServerConnection();
+
+
+            socket.on("connect", function(data) {
+                //addMessage(data.message);
+                console.log("connect event received!");
+                $("#startGameButton").prop('disabled', false);
+                //startGame();
+                // Respond with a message including this clients' id sent from the server
+                //socket.emit('i am client', {data: 'foo!', id: data.id});
+            });
+
+            socket.on('time', function(data) {
+                addMessage(data.time);
+            });
+            socket.on("log", function(logData) {
+                //addMessage(logData);
+                $("#logBox").append(logData + "\n");
+                //logBox = document.getElementById("logBox");
+                //logBox.appendChild(logData);
+            });
+            socket.on("gameUpdate", function(eventData) {
+                $("#gameField").append(JSON.stringify(eventData));
+            });
+            socket.on('error', console.error.bind(console));
+            socket.on('message', console.log.bind(console));
+
+            function addMessage(message) {
+                var text = document.createTextNode(message),
+                    el = document.createElement('li'),
+                    messages = document.getElementById('messages');
+
+                el.appendChild(text);
+                messages.appendChild(el);
+            }
+*/
+        </script>
+        <!-->
+        <style type="text/css">
+          canvas { border: 1px solid black; }
+        </style>
+        </!-->
+    </head>
+    <body onload="initialize();">
+        <button type="button" id="startGameButton" disabled onclick="startGame()">Start game</button>
+        <button type="button" id="quitGameButton" onclick="quitGame()">Quit game</button>
+        <button type="button" id="left" onclick="moveLeft()">left</button>
+        <button type="button" id="right" onclick="moveRight()">right</button>
+        <button type="button" id="up" onclick="moveUp()">up</button>
+        <button type="button" id="down" onclick="moveDown()">down</button>
+        <ul id='messages'></ul>
+        <canvas id="gameBoard"></canvas>
+        <div id="gameField"></div>
+        <div id="logBox"></div>
+    </body>
+</html>

@@ -8,15 +8,33 @@ var DEFAULTS = {
 
 function Character(attributes) {
     if(!attributes) {
-        this.attributes = {
-            might: DEFAULTS.might,
-            agility: DEFAULTS.agility,
-            stamina: DEFAULTS.stamina
-        };
+        this.attributes = generateRandomAttributes();
     }
     this.coordinates = {};
-    this.inventory = {};
+    this.inventory = {
+        using: {
+            weapon: undefined,
+            armor: undefined
+        },
+        backpack: []
+    };
+    this.hitPoints = {
+        max: this.attributes.stamina * 4,
+        current: this.attributes.stamina * 4
+    };
 }
+
+function generateRandomAttributes() {
+    return {
+        might: _.random(3,6),//DEFAULTS.might,
+        agility: _.random(3,6),
+        stamina: _.random(3,6)
+    };
+}
+
+Character.prototype.getAttribute = function(attributeAsString) {
+    return this.attributes[attributeAsString];
+};
 
 Character.prototype.addToInventory = function(object) {
     _.extend(this.inventory, object);
@@ -25,16 +43,6 @@ Character.prototype.addToInventory = function(object) {
 Character.prototype.updateCoordinates = function(x, y) {
     this.coordinates.x = x;
     this.coordinates.y = y;
-};
-
-Character.prototype.incomingAttack = function(hitChance, damage) {
-    //deflect vs. hitChance
-    //damage reduction damage - armor
-    // return miss/hit with X damage
-};
-
-Character.prototype.makeAttack = function(weapon) {
-    //return hitChance + damage
 };
 
 Character.prototype.getCurrentCoordinates = function() {
@@ -47,6 +55,14 @@ Character.prototype.setNewCoordinates = function(newCoordinates) {
 
 Character.prototype.moveCharacterTo = function() {
     //return hitChance + damage
+};
+
+Character.prototype.reduceHitPoints = function(amount) {
+    this.hitPoints.current -= amount;
+};
+
+Character.prototype.isDead = function() {
+    return this.hitPoints.current <= 0;
 };
 
 module.exports = Character;

@@ -1,15 +1,28 @@
+var eventHandler = require("./eventHandler");
+var server = require("./server");
+
 function initialize() {
-    console.log("initialize ui Handler");
+    eventHandler.logStream.onValue(function(logData) {
+        console.log("EVENT LOG: " + logData);
+        server.sendLog(logData);
+    });
+    eventHandler.gameEventStream.onValue(function(eventData) {
+        console.log("ui contr, sendEvent: " + eventData);
+        server.sendEvent(eventData);
+    });
 }
 
-function printGameWorld(gameWorld) {
+function getGameWorldAsAscii(gameWorld) {
+    var totalString = "";
     gameWorld.board.forEach(function(row) {
         var rowString = "|";
         row.forEach(function(tile) {
             if (!tile.occupant) {
                 rowString += " ";
-            } else {
+            } else if (!tile.occupant.isDead()) {
                 rowString += "X";
+            } else {
+                rowString += "D";
             }
 /*
             } else if (tile.occupant === "enemy") {
@@ -20,13 +33,19 @@ function printGameWorld(gameWorld) {
 */
             rowString += "|";
         });
-        console.log(rowString);
+        totalString += rowString + "\n";//console.log(rowString);
     });
-    console.log("Occupant 0, 0: " + JSON.stringify(gameWorld.board[0][0].occupant));
-    console.log("First char on list: " + JSON.stringify(gameWorld.characters[0]));
+    return totalString;
+    //console.log("Occupant 0, 0: " + JSON.stringify(gameWorld.board[0][0].occupant));
+    //console.log("First char on list: " + JSON.stringify(gameWorld.characters[0]));
 }
 
-function printCharacters() {
+function printGameWorld(gameWorld) {
+    console.log(getGameWorldAsAscii(gameWorld));
+    eventHandler.logEvent(getGameWorldAsAscii(gameWorld));
+}
+
+function printCharacters(gameWorld) {
     gameWorld.characters.forEach(function(character) {
         console.log(character);
     });
