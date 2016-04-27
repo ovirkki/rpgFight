@@ -1,90 +1,100 @@
 var serverAddress = "http://localhost:3000";
-var socket, canvas;
-var GAME_BOARD_WIDTH = 300;
-var GAME_BOARD_HEIGHT = 300;
+var socket, canvas, ctx;
+var GAME_BOARD_WIDTH = 500;
+var GAME_BOARD_HEIGHT = 500;
 var gameHeight, gameWidth;
 
 var pathToEmptyTileImg = "img/emptyTile.png";
 var pathToPlayerImg = "img/Untitled.png";
 
 function draw(gameData) {
-    $("#gameBoard").css({ border: "1px solid black" });
+    addCharacters(gameData.characters);
     $("#gameBoard").prop("width", GAME_BOARD_WIDTH);
     $("#gameBoard").prop("height", GAME_BOARD_HEIGHT);
     canvas = document.getElementById("gameBoard");
-    console.log("draw called");
-    console.log(gameData);
+    //console.log(gameData);
     if (canvas.getContext){
-        var ctx = canvas.getContext("2d");
-        gameHeight = gameData.board.length;
-        gameWidth = gameData.board[0].length;
-        drawTiles(gameData.board);
+        ctx = canvas.getContext("2d");
+        gameHeight = gameData.board.tiles.length;
+        gameWidth = gameData.board.tiles[0].length;
+        drawTiles(gameData.board.tiles);
         canvas.addEventListener('click', generateAction, false);
     } else {
         console.log("canvas not supported");
     }
 }
 
-function getUpperLeftCoordinate(xPos, yPos, rows, columns) {
-    console.log("position: x: " + xPos + ",y: " + yPos);
-    var heightOfTile = GAME_BOARD_HEIGHT / gameHeight;
-    var widthOfTile = GAME_BOARD_WIDTH / gameWidth;
-    var x = xPos * widthOfTile;
-    var y = yPos * heightOfTile;
-    console.log("X&Y: " + x + ", " + y);
-    return {x: x, y: y};
+function getPortraitSourceForCharacter(id) {
+    var portraitId = id+1;
+    return "img/player" + portraitId + ".png";
 }
 
-function getXCoordinate(xPos, columns) { //gets x coordinate of upper left for tile
-    return (xPos / columns) * GAME_BOARD_WIDTH;
+function addCharacters(characterArray) {
+    console.log("characters: " + characterArray);
+    characterArray.forEach(function(characterData) {
+        var playerPortraitSource = getPortraitSourceForCharacter(characterData.id);
+        var playerImgElement = $("<img>", {class: "player-img", "src": playerPortraitSource, "alt": ""});
+        playerImgElement.css("width", "80px");
+        var characterInfo = characterData.id;
+        var playerElement = $("<div>", {id: "characterData-" + characterData.id, class: "characterData"});
+        playerElement.append(playerImgElement);
+        console.log(JSON.stringify(characterData));
+        $("#characters").append(playerElement);
+    });
+    $("#characterData-0").addClass("activeCharacter");
 }
 
-function getYCoordinate(yPos, rows) { //gets y coordinate of upper left for tile
-    return (yPos / rows) * GAME_BOARD_HEIGHT;
-}
-
-function addImageToTile(src, column, row) {
-    var ctx = canvas.getContext("2d");
+function getTileDataArrayForCtxDraw(column, row) {
 
     var tileHeight = GAME_BOARD_HEIGHT / gameHeight;
     var tileWidth = GAME_BOARD_WIDTH / gameWidth;
-    var x = Math.floor(column * tileWidth); //getXCoordinate(tile.coordinates.x, columns);
-    var y = Math.floor(row * tileHeight);  //getYCoordinate(tile.coordinates.y, rows);
+    var x = Math.floor(column * tileWidth);
+    var y = Math.floor(row * tileHeight);
+    return {
+        x: x,
+        y: y,
+        width: tileWidth,
+        height: tileHeight
+    };
+}
+
+function addImageToTile(src, column, row) {
+
+    var drawData = getTileDataArrayForCtxDraw(column, row);
     var img = new Image();
     img.onload = function() {
-        ctx.drawImage(img, x, y, tileWidth, tileHeight);
+        ctx.drawImage(img, drawData.x, drawData.y, drawData.width, drawData.height);
     };
     img.src = src;
 }
 
+function clearTile(column, row) {
+    var drawData = getTileDataArrayForCtxDraw(column, row);
+    ctx.clearRect(drawData.x, drawData.y, drawData.width, drawData.height);
+}
+
 function drawTiles(rowArray) {
-    var ctx = canvas.getContext("2d");
 
     var tileHeight = GAME_BOARD_HEIGHT / gameHeight;
     var tileWidth = GAME_BOARD_WIDTH / gameWidth;
     //console.log("size: r: " + rows + ", c: " + columns);
     var tileArrays = rowArray.forEach(function(row) {
         return row.forEach(function(tile) {
-            /*var x = Math.floor(tile.coordinates.x * tileWidth); //getXCoordinate(tile.coordinates.x, columns);
-            var y = Math.floor(tile.coordinates.y * tileHeight);  //getYCoordinate(tile.coordinates.y, rows);
-            var img = new Image();
-            img.onload = function() {
-                ctx.drawImage(img, x, y, tileWidth, tileHeight);
-            };*/
             var src;
             if(!tile.occupant) {
-                src = pathToEmptyTileImg;
+
+                //src = pathToEmptyTileImg;
             } else {
-                src = pathToPlayerImg;
+                src = getPortraitSourceForCharacter(tile.occupant.id);
+                addImageToTile(src, tile.coordinates.x, tile.coordinates.y);
             }
-            addImageToTile(src, tile.coordinates.x, tile.coordinates.y);
+            //addImageToTile(src, tile.coordinates.x, tile.coordinates.y);
 
         });
     });
 }
 
 function renderCharacterEvent(data) {
-    console.log("HERE!: " + JSON.stringify(data));
     if(data.tileOperation === "clear") {
         addImageToTile(pathToEmptyTileImg, data.coordinates.x, data.coordinates.y);
     } else if(data.tileOperation === "add") {
@@ -92,8 +102,14 @@ function renderCharacterEvent(data) {
     }
 }
 
-function getClickedTile(x, y) {
+function renderMoveEvent(character, moveData) {
+    //addImageToTile(pathToEmptyTileImg, eventData.data.oldCoordinates.x, eventData.data.oldCoordinates.y);
+    clearTile(moveData.data.oldCoordinates.x, moveData.data.oldCoordinates.y);
+    addImageToTile(getPortraitSourceForCharacter(character.id), moveData.coordinates.x, moveData.coordinates.y);
+}
 
+function renderAttackEvent() {
+    console.log("ATTACK!: ");
 }
 
 function moveLeft() {
@@ -132,11 +148,32 @@ function moveDown() {
     });
 }
 
+function getClickedTile(event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+
+    var column = Math.floor(gameWidth * x / GAME_BOARD_WIDTH);
+    var row = Math.floor(gameHeight * y / GAME_BOARD_HEIGHT);
+    return {
+        x: column,
+        y: row
+    };
+    //console.log("clicked coordinates: col: " + column + ", row: " + row);
+}
+
 function generateAction(event) {
-    var x = event.clientX - canvas.offsetLeft;
-    var y = event.clientY - canvas.offsetTop;
-    console.log("X: " + x);
-    console.log("Y: " + y);
+    var coordinates = getClickedTile(event);
+    if(event.shiftKey) {
+        //attack
+        console.log("attack to " + JSON.stringify(coordinates));
+    } else {
+        //move
+        console.log("move to " + JSON.stringify(coordinates));
+    }
+    socket.emit("action", {
+        coordinates: getClickedTile(event)
+    });
 }
 
 function generateServerConnection() {
@@ -150,22 +187,39 @@ function startGame() {
 function quitGame() {
     socket.emit("quit");
 }
-//draw();
-generateServerConnection();
 
-function parseGameUpdate(data) {
+function parseGameUpdate(newGamedata) {
 
-    if(!data || !data.operation || !data.changedData) {
-        console.log("No data to be parsed!");
+    if(!newGamedata || !newGamedata.operation) {
+        console.log("No game data to be parsed!");
         return;
     }
-    console.log("Parsing gameUpdate, operation: " + data.operation);
-    if (data.operation === "gameInit") {
+    console.log("Parsing gameUpdate, operation: " + newGamedata.operation);
+    if (newGamedata.operation === "gameInit") {
         console.log("init game!");
-        draw(data.changedData);
-    } else if (data.operation === "characterEvent") {
-        console.log("character event: " + JSON.stringify(data.changedData));
-        renderCharacterEvent(data.changedData);
+        draw(newGamedata.eventData);
+    } else if (newGamedata.operation === "nextTurn") {
+        console.log("next turn!!!: " + JSON.stringify(newGamedata.eventData));
+        $(".activeCharacter").removeClass("activeCharacter");
+        $("#characterData-" + newGamedata.eventData.characterId).addClass("activeCharacter");
+    }
+}
+
+function parseCharacterUpdate(data) {
+
+    if(!data || !data.operation || !data.character) {
+        console.log("No player data to be parsed!");
+        return;
+    }
+    console.log("Parsing playerUpdate, operation: " + data.operation);
+    if (data.operation === "move") {
+        console.log("move event: " + JSON.stringify(data.eventData));
+        renderMoveEvent(data.character, data.eventData);
+    } else if (data.operation === "attack") {
+        console.log("attack event: " + JSON.stringify(data));
+        renderAttackEvent();
+    } else if(data.operation === "getDamage") {
+        console.log("getting damage: " + JSON.stringify(data.eventData));
     }
 }
 
@@ -174,23 +228,21 @@ function addSocketEventHandlers() {
         //addMessage(data.message);
         console.log("connect event received!");
         $("#startGameButton").prop('disabled', false);
-        //startGame();
-        // Respond with a message including this clients' id sent from the server
-        //socket.emit('i am client', {data: 'foo!', id: data.id});
     });
 
     socket.on("initGame", function(data) {
         console.log("game init received: " + data);
     });
-    socket.on("log", function(logData) {
-        //addMessage(logData);
-        $("#logBox").append(logData + "\n");
-        //logBox = document.getElementById("logBox");
-        //logBox.appendChild(logData);
-    });
     socket.on("gameUpdate", function(eventData) {
         //$("#gameField").append(JSON.stringify(eventData));
         parseGameUpdate(eventData);
+    });
+    socket.on("characterUpdate", function(eventData) {
+        //$("#gameField").append(JSON.stringify(eventData));
+        parseCharacterUpdate(eventData);
+    });
+    socket.on("log", function(logData) {
+        $("#logBox").append(logData + "<br>");
     });
     socket.on('error', console.error.bind(console));
     socket.on('message', console.log.bind(console));

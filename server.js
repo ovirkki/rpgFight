@@ -20,20 +20,7 @@ function initialize() {
     });
     io = socketio.listen(server);
     server.listen(PORT);
-    inputController.initialize();
-}
-
-// Send current time to all connected clients
-function sendTime() {
-    io.emit('time', { time: new Date().toJSON() });
-}
-
-// Send current time every 10 secs
-//setInterval(sendTime, 10000);
-
-function getCharacterBySocketId(socketId) {
-    var character = gameHandler.getCharacterBySocketId(socketId);
-    return socketId;
+    //inputController.initialize();
 }
 
 function initActionListeners(socket) {
@@ -53,10 +40,12 @@ function initActionListeners(socket) {
     socket.on("action", function(data) {
         console.log("Action!");
         var inputObject = {
-            character: gameHandler.getCharacterBySocketId(socket.id),
-            action: data
+            //character: gameHandler.getCharacterBySocketId(socket.id),
+            character: gameHandler.getActiveCharacter(),
+            actionData: data
         };
-        eventHandler.newInput(inputObject);
+        //eventHandler.newInput(inputObject);
+        inputController.newInput(inputObject);
     });
 }
 
@@ -65,7 +54,7 @@ function gameOngoingPromise() {
     return new Promise(function (resolve, reject) {
         // Emit welcome message on connection
         io.on('connection', function(socket) {
-            logEvent("Connected");
+            logEvent("Connected: socket: " + socket.id);
             initActionListeners(socket);
             socket.on("disconnect", function() {
                 console.log("disconnect!");
@@ -84,17 +73,22 @@ function sendLog(logData) {
     io.emit("log", logData);
 }
 
-function sendEvent(eventData) {
+function sendCharacterEvent(eventData) {
+    io.emit("characterUpdate", eventData);
+}
+
+function sendGameEvent(eventData) {
     io.emit("gameUpdate", eventData);
 }
 
 function initGame(gameObject) {
-    io.emit("initGame", boardObject);
+    //io.emit("initGame", boardObject);
 }
 
 module.exports.initialize = initialize;
 module.exports.startGame = gameOngoingPromise;
 module.exports.startServerAndWaitForGameEvents = gameOngoingPromise;
 module.exports.sendLog = sendLog;
-module.exports.sendEvent = sendEvent;
+module.exports.sendCharacterEvent = sendCharacterEvent;
+module.exports.sendGameEvent = sendGameEvent;
 module.exports.initGame = initGame;

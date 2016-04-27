@@ -2,11 +2,13 @@
 <html>
     <head>
         <meta charset="utf-8"/>
+
         <!--><script src="jquery-1.12.0.min.js"></script></!-->
         <script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
         <!--><script src='http://localhost:3000/socket.io/socket.io.js'></script></!-->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
         <script src='gamePage.js'></script>
+        <link rel="stylesheet" type="text/css" href="game.css">
         <script type="text/javascript">
         /*
             var serverAddress = "http://localhost:3000";
@@ -90,9 +92,10 @@
         <button type="button" id="right" onclick="moveRight()">right</button>
         <button type="button" id="up" onclick="moveUp()">up</button>
         <button type="button" id="down" onclick="moveDown()">down</button>
-        <ul id='messages'></ul>
+        <button type="button" id="attack" onclick="attack()">down</button>
+        <br>
+        <div id="characters"></div>
         <canvas id="gameBoard"></canvas>
-        <div id="gameField"></div>
         <div id="logBox"></div>
     </body>
 </html>

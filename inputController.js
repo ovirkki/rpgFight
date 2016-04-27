@@ -1,4 +1,5 @@
 var gameHandler = require("./gameHandler");
+var gameBoard = require("./gameBoard");
 var Bacon = require("baconjs").Bacon;
 var events = require("events");
 var constants = require("./constants");
@@ -32,38 +33,41 @@ var keyMap = {
     "down": DIRECTION_FUNCTION.DOWN,
 };
 
-function handleDirection(key) {
+function handleDirection(key, char) {
     console.log("handleDirection: " + key);
     if(keyMap[key]) {
-        keyMap[key]();
+        keyMap[key](char);
     }
 }
 
-function moveLeft() {
-    gameHandler.movePlayerTo(-1, 0);
+function moveLeft(character) {
+    gameHandler.moveCharacterTo(character, -1, 0);
 }
 
-function moveRight() {
-    gameHandler.movePlayerTo(1, 0);
+function moveRight(character) {
+    gameHandler.moveCharacterTo(character, 1, 0);
 }
 
-function moveUp() {
-    gameHandler.movePlayerTo(0, -1);
+function moveUp(character) {
+    gameHandler.moveCharacterTo(character, 0, -1);
 }
 
-function moveDown() {
-    gameHandler.movePlayerTo(0, 1);
+function moveDown(character) {
+    gameHandler.moveCharacterTo(character, 0, 1);
 }
 
 function parseInputData(inputData) {
     console.log("Need to parse input data: " + JSON.stringify(inputData));
-    if(inputData.action && inputData.action.operation === "move") {
-        handleDirection(inputData.action.data.direction);
+    if(inputData.action && inputData.actionData.operation === "move") {
+        handleDirection(inputData.actionData.data.direction, inputData.character);
+    } else {
+        console.log("CHARRR: " + JSON.stringify(inputData.character));
+        gameHandler.handleGeneralAction(inputData.character, inputData.actionData.coordinates);
     }
-    /*
-    Parse inputData: if move, is it allowed etc.
-    If valid action, emit it to gameEvent stream
-    */
+}
+
+function newInput(inputObject) {
+    parseInputData(inputObject);
 }
 
 function startListening() {
@@ -88,10 +92,6 @@ function startListening() {
     });
 }
 
-function initialize() {
-    eventHandler.inputStream.onValue(parseInputData);
-    //startListening();
-}
-
-module.exports.initialize = initialize;
+//module.exports.initialize = initialize;
 module.exports.startListening = startListening;
+module.exports.newInput = newInput;

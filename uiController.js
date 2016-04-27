@@ -6,15 +6,19 @@ function initialize() {
         console.log("EVENT LOG: " + logData);
         server.sendLog(logData);
     });
+    eventHandler.characterEventStream.onValue(function(eventData) {
+        //console.log("ui contr, sendEvent: " + JSON.stringify(eventData));
+        server.sendCharacterEvent(eventData);
+    });
     eventHandler.gameEventStream.onValue(function(eventData) {
-        console.log("ui contr, sendEvent: " + eventData);
-        server.sendEvent(eventData);
+        //console.log("ui contr, sendEvent: " + JSON.stringify(eventData));
+        server.sendGameEvent(eventData);
     });
 }
 
 function getGameWorldAsAscii(gameWorld) {
     var totalString = "";
-    gameWorld.board.forEach(function(row) {
+    gameWorld.board.tiles.forEach(function(row) {
         var rowString = "|";
         row.forEach(function(tile) {
             if (!tile.occupant) {
@@ -41,7 +45,6 @@ function getGameWorldAsAscii(gameWorld) {
 }
 
 function printGameWorld(gameWorld) {
-    console.log(getGameWorldAsAscii(gameWorld));
     eventHandler.logEvent(getGameWorldAsAscii(gameWorld));
 }
 
