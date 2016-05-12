@@ -38,6 +38,7 @@ var constants = {
     },
     weapon: {
         PISTOL: {
+            name: "pistol",
             range: 3,
             damage: 2,
             accuracy: 2

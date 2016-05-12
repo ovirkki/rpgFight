@@ -29,15 +29,22 @@ function getPortraitSourceForCharacter(id) {
     return "img/player" + portraitId + ".png";
 }
 
+function getInitializedPlayerData(characterData) {
+    var detailedData = $("<div>", {class: "detailedData"});
+    var weaponData = $("<div>", {class: "weaponData"}).text("Weapon: " + characterData.inventory.using.weapon.name);
+    var healthData = $("<div>", {class: "healthData"}).text("Health: ");
+    var currentHealth = $("<span>", {class: "currentHealth"}).text(characterData.hitPoints.current).appendTo(healthData);
+    var maxHealth = $("<span>", {class: "maxHealth"}).text("/" + characterData.hitPoints.max).appendTo(healthData);
+    return detailedData.append(weaponData).append(healthData);
+}
+
 function addCharacters(characterArray) {
     console.log("characters: " + characterArray);
     characterArray.forEach(function(characterData) {
         var playerPortraitSource = getPortraitSourceForCharacter(characterData.id);
         var playerImgElement = $("<img>", {class: "player-img", "src": playerPortraitSource, "alt": ""});
-        playerImgElement.css("width", "80px");
-        var characterInfo = characterData.id;
         var playerElement = $("<div>", {id: "characterData-" + characterData.id, class: "characterData"});
-        playerElement.append(playerImgElement);
+        playerElement.append(playerImgElement).append(getInitializedPlayerData(characterData));
         console.log(JSON.stringify(characterData));
         $("#characters").append(playerElement);
     });
@@ -110,6 +117,11 @@ function renderMoveEvent(character, moveData) {
 
 function renderAttackEvent() {
     console.log("ATTACK!: ");
+}
+
+function renderDamage(character, damageData) {
+    console.log("render damage: " + "#characterData-" + character.id + ".currentHealth");
+    $("#characterData-" + character.id + " .currentHealth").text(damageData.currentHitpoints);
 }
 
 function moveLeft() {
@@ -219,7 +231,8 @@ function parseCharacterUpdate(data) {
         console.log("attack event: " + JSON.stringify(data));
         renderAttackEvent();
     } else if(data.operation === "getDamage") {
-        console.log("getting damage: " + JSON.stringify(data.eventData));
+        console.log("getting damage: " + JSON.stringify(data));
+        renderDamage(data.character, data.eventData);
     }
 }
 

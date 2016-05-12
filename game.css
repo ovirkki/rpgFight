@@ -2,6 +2,21 @@
     border: 1px solid black;
     background-color: rgba(22, 222, 22, 0.3);
 }
+.player-img {
+    width: 50px;
+}
+
+.characterData {
+    display: block;
+}
+
+.healthData {
+    display: inline;
+}
+
+.detailedData {
+    display: inline-block;
+}
 
 .activeCharacter {
     background-color: rgba(22, 22, 222, 0.3);

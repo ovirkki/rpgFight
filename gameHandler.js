@@ -94,7 +94,7 @@ function moveCharacterTo(character, relativeX, relativeY) {
 }
 
 function handleGeneralAction(character, coordinates) {
-    uiController.printGameWorld(gameWorld);
+//    uiController.printGameWorld(gameWorld);
     var targetDistance = gameWorld.board.calculateDistance(character.getCurrentCoordinates(), coordinates);
     if(targetDistance === 0) return;
 
